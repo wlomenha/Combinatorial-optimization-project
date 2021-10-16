@@ -1,4 +1,4 @@
-using Gurobi, JuMP, LightGraphs, DelimitedFiles, GraphPlot
+using Gurobi, JuMP, LightGraphs, DelimitedFiles, GraphPlot, Random
 
 path = "D:\\GitHub - Projects\\vertex-packing\\instancia.txt" #instancia
 
@@ -188,12 +188,10 @@ println(best_lim_inf)
 println(best_lim_sup) 
 
 
-
-
 function guloso(n,a)
     
     G = generate_graph(a,n)
-    plotGraph(G)
+    #plotGraph(G)
     packing = []
     v = zeros(n)
 
@@ -252,12 +250,147 @@ end
 
 
 
-
 n,m,a = leitura_arquivo(path)
 clean_matrix(a,n)
 
 guloso(n,a)
 
 
+function guloso_pseudo_random(n,a)
+    
+    G = generate_graph(a,n)
+    #plotGraph(G)
+    packing = []
+    v = zeros(n)
 
-println(degree(G))
+    choice = rand(1:n)
+    v[choice] = 1
+    append!(packing,choice)
+
+    auxiliar = all_neighbors(G,choice)
+    vizinhos = copy(auxiliar)
+
+    for h in vizinhos #impossibilitando de adicionar os vizinhos no packing
+        v[h] = 1
+    end     
+
+    append!(vizinhos,choice)
+    
+    for i in vizinhos
+        aux = neighbors(G, i)
+        aux_vizinho = copy(aux)
+        for j in aux_vizinho
+            rem_edge!(G,i,j)
+        end
+    end
+
+
+    while true
+
+    #percorrer a lista de graus, pegar o com menor grau diferente de 0
+
+        min_degree = 9999
+        aux_index = 0
+        index = 0
+
+        for degree in degree(G)
+            aux_index +=1
+            if v[aux_index] == 0 && degree < min_degree
+                min_degree = degree
+                index = aux_index 
+            end
+        end
+        v[index] = 1
+        println("o vértice escolhido para entrar no packing foi: ", index)
+    #adicionar ao empacotamento para
+
+        append!(packing,index)
+
+    #remover todas as arestas de u e dos vizinhos de um
+
+        auxiliar = all_neighbors(G,index)
+        vizinhos = copy(auxiliar)
+        for h in vizinhos #impossibilitando de adicionar os vizinhos no packing
+            v[h] = 1
+        end     
+        append!(vizinhos,index)
+        
+
+        for i in vizinhos
+            aux = neighbors(G, i)
+            aux_vizinho = copy(aux)
+            for j in aux_vizinho
+                rem_edge!(G,i,j)
+            end
+        end
+
+    #repetir os processos anteriores até que todos os graus sejam 0
+        println(degree(G))
+        count_zeros = 0
+        for k in degree(G)
+            if k == 0
+                count_zeros += 1
+            end
+            if count_zeros == length(degree(G))
+                return packing
+            end
+        end  
+    end
+end
+
+guloso_pseudo_random(n,a)
+
+function guloso_random(n,a)
+    
+    G = generate_graph(a,n)
+    #plotGraph(G)
+    packing = []
+    v = zeros(n)
+
+    while true
+
+    #percorrer a lista de graus, pegar o com menor grau diferente de 0
+        choice = rand(1:n)
+        if v[choice] == 1
+            while v[choice] == 1
+                choice = rand(1:n)
+            end
+        end
+        
+        v[choice] = 1
+        append!(packing,choice)
+
+    #remover todas as arestas de u e dos vizinhos de um
+
+        auxiliar = all_neighbors(G,choice)
+        vizinhos = copy(auxiliar)
+        for h in vizinhos #impossibilitando de adicionar os vizinhos no packing
+            v[h] = 1
+        end     
+        append!(vizinhos,choice)
+        
+
+        for i in vizinhos
+            aux = neighbors(G, i)
+            aux_vizinho = copy(aux)
+            for j in aux_vizinho
+                rem_edge!(G,i,j)
+            end
+        end
+
+    #repetir os processos anteriores até que todos os graus sejam 0
+        println(degree(G))
+        count_zeros = 0
+        for k in degree(G)
+            if k == 0
+                count_zeros += 1
+            end
+            if count_zeros == n
+                return packing
+            end
+        end  
+    end
+end
+
+guloso_random(n,a)
+
