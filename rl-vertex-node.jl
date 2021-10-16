@@ -1,8 +1,10 @@
 using Gurobi, JuMP, LightGraphs, DelimitedFiles, GraphPlot
 
-path = "C:\\Users\\Wanderson\\OneDrive\\Área de Trabalho\\vertex-packing\\instancia.txt" #instancia
+path = "D:\\GitHub - Projects\\vertex-packing\\instancia.txt" #instancia
 
-path = "C:\\Users\\Wanderson\\OneDrive\\Área de Trabalho\\vertex-packing\\instancia2.txt" #instancia 2
+path = "D:\\GitHub - Projects\\vertex-packing\\instancia2.txt" #instancia 2
+
+path = "D:\\GitHub - Projects\\vertex-packing\\instancia3.txt" #instancia 3 com 32 vértices
 
 
 function plotGraph(graph)
@@ -187,11 +189,13 @@ println(best_lim_sup)
 
 
 
-function guloso(n,a)
 
+function guloso(n,a)
+    
     G = generate_graph(a,n)
+    plotGraph(G)
     packing = []
-    vistos = [9999]
+    v = zeros(n)
 
     while true
 
@@ -203,16 +207,13 @@ function guloso(n,a)
 
         for degree in degree(G)
             aux_index +=1
-            for i in vistos
-                if aux_index != i && degree < min_degree
-                    println("entrei nos que tem indice diferente")
-                    println("indice", aux_index)
-                    min_degree = degree
-                    index = aux_index 
-                end
+            if v[aux_index] == 0 && degree < min_degree
+                min_degree = degree
+                index = aux_index 
             end
         end
-
+        v[index] = 1
+        println("o vértice escolhido para entrar no packing foi: ", index)
     #adicionar ao empacotamento para
 
         append!(packing,index)
@@ -221,14 +222,11 @@ function guloso(n,a)
 
         auxiliar = all_neighbors(G,index)
         vizinhos = copy(auxiliar)
+        for h in vizinhos #impossibilitando de adicionar os vizinhos no packing
+            v[h] = 1
+        end     
         append!(vizinhos,index)
-
-        for l in vizinhos
-            append!(vistos,l)
-            println("to salvando os já vistos")
-        end
-
-        println(vistos)
+        
 
         for i in vizinhos
             aux = neighbors(G, i)
@@ -239,7 +237,7 @@ function guloso(n,a)
         end
 
     #repetir os processos anteriores até que todos os graus sejam 0
-
+        println(degree(G))
         count_zeros = 0
         for k in degree(G)
             if k == 0
@@ -259,5 +257,7 @@ n,m,a = leitura_arquivo(path)
 clean_matrix(a,n)
 
 guloso(n,a)
+
+
 
 println(degree(G))
