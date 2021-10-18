@@ -6,6 +6,7 @@ path = "D:\\GitHub - Projects\\vertex-packing\\instancia2.txt" #instancia 2
 
 path = "D:\\GitHub - Projects\\vertex-packing\\instancia3.txt" #instancia 3 com 32 vértices
 
+path = "D:\\GitHub - Projects\\vertex-packing\\instancia250v05.txt"
 
 function plotGraph(graph)
     nodelabel = 1:nv(graph)
@@ -251,9 +252,8 @@ end
 
 
 n,m,a = leitura_arquivo(path)
-clean_matrix(a,n)
 
-guloso(n,a)
+guloso(n,a) 
 
 
 function guloso_pseudo_random(n,a)
